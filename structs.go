@@ -1,6 +1,8 @@
-package utils
+package bilibili_tools_go
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // Bilibili is a struct for easy net.Client access
 type Bilibili struct {
@@ -56,4 +58,23 @@ type userAccess struct {
 		} `json:"cookie_info"`
 	} `json:"data"`
 	Message string `json:"message"`
+}
+
+type liveReceivedGiftList struct {
+	Code int `json:"code"`
+	Msg string `json:"msg"`
+	Message string `json:"message"`
+	Data struct{
+		List []struct{
+			UID int `json:"uid"`
+			UName string `json:"uname"`
+			Time string `json:"time"`
+			GiftID int `json:"gift_id"`
+			GiftName string `json:"gift_name"`
+			GiftNum int `json:"gift_num"`
+			Hamster int `json:"hamster"`
+		} `json:"list"`
+		HasMore int `json:"has_more"`
+		NextOffset string `json:"next_offset"`
+	} `json:"data"`
 }

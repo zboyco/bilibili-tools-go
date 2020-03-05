@@ -1,4 +1,4 @@
-package utils
+package bilibili_tools_go
 
 import (
 	"crypto/md5"
