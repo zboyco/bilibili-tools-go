@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/skratchdot/open-golang/open"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -25,12 +24,6 @@ func NewFromLogin(userName, userPwd string) (*Bilibili, error) {
 		return nil, err
 	}
 	bili := &Bilibili{Client: &http.Client{Jar: jar}}
-
-	//code, err := bili.getCaptcha()
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	if err = bili.login(userName, userPwd, ""); err != nil {
 		return nil, err
 	}
@@ -156,10 +149,10 @@ func (bili *Bilibili) getCaptcha() (string, error) {
 	imagesData, _ := ioutil.ReadAll(resp.Body)
 	ret, err = identifyCaptcha(imagesData)
 	if err == nil {
-		log.Println("自动识别验证码成功...")
-		return strings.ToLower(ret), nil
+		fmt.Println("自动识别验证码成功...")
+		return strings.ToUpper(ret), nil
 	}
-	log.Println("自动识别验证码失败，请手动填写...")
+	fmt.Println("自动识别验证码失败，请手动填写...")
 
 	tmpFilePath := filepath.Join(os.TempDir(), "bilibili-captcha.jpg")
 	tmpFile, err := os.Create(tmpFilePath)
@@ -174,16 +167,16 @@ func (bili *Bilibili) getCaptcha() (string, error) {
 	}
 	tmpFile.Close()
 
-	log.Println("正在打开验证码图片...")
+	fmt.Println("正在打开验证码图片...")
 	err = open.Start(tmpFilePath)
 	if err != nil {
-		log.Printf("打开图片失败，请自行打开【%s】\n", tmpFilePath)
+		fmt.Printf("打开图片失败，请自行打开【%s】\n", tmpFilePath)
 	}
 	fmt.Print("请输入验证码并回车：")
 	if _, err = fmt.Scanf("%s", &ret); err != nil {
 		return "", err
 	}
-	return strings.ToLower(ret), nil
+	return strings.ToUpper(ret), nil
 }
 
 // 识别验证码

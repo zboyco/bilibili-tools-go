@@ -4,14 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/zboyco/bilibili-tools-go"
-	"log"
 	"os"
-	"time"
 )
 
 func main() {
 	defer func() {
-		time.Sleep(100 * time.Millisecond)
 		var in string
 		fmt.Println("按 回车 键退出...")
 		fmt.Scanln(&in)
@@ -28,24 +25,23 @@ func main() {
 	if reader.Scan() {
 		userPwd = reader.Text()
 	}
-	log.Println("尝试登录...")
+	fmt.Println("尝试登录...")
 	b, err := bilibili_tools_go.NewFromLogin(userName, userPwd)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return
 	}
 	logged, err := b.IsLoggedIn()
 	if err != nil {
-		log.Println("登录失败：", err)
+		fmt.Println("登录失败：", err)
 		return
 	}
 	if !logged {
-		log.Println("登录失败：稍后重试！")
+		fmt.Println("登录失败：稍后重试！")
 		return
 	}
 
-	log.Println("登录成功...", )
-	time.Sleep(10 * time.Millisecond)
+	fmt.Println("登录成功...", )
 	var date string
 	fmt.Print("请输入需要导出的日期(如:20200305): ")
 	if reader.Scan() {

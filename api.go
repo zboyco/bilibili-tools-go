@@ -2,7 +2,6 @@ package bilibili_tools_go
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"net/url"
 	"strconv"
@@ -17,10 +16,10 @@ func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 	// 访问直播中心礼物流水页面
 	_, err := bili.Client.Get("https://link.bilibili.com/p/center/index#/my-room/gift-list")
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return
 	}
-	log.Println("开始导出...")
+	fmt.Println("开始导出...")
 
 	// 创建文件
 	f := excelize.NewFile()
@@ -52,7 +51,7 @@ func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 				f.SetCellValue("Sheet1", fmt.Sprintf("D%v", line), item.GiftNum)
 				f.SetCellValue("Sheet1", fmt.Sprintf("E%v", line), item.Hamster)
 				f.SetCellValue("Sheet1", fmt.Sprintf("F%v", line), item.Time)
-				log.Println(item.UName, ":", item.GiftName, "*", item.GiftNum)
+				fmt.Println(item.UName, ":", item.GiftName, "*", item.GiftNum)
 			}
 		}
 	}(writeQueue)
@@ -68,12 +67,12 @@ func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 
 			list, err := bili.getReceivedGiftList(date, offset)
 			if err != nil {
-				log.Println(err)
+				fmt.Println(err)
 				return
 			}
 
 			if list.Code != 0 {
-				log.Println(list.Message)
+				fmt.Println(list.Message)
 				return
 			}
 
