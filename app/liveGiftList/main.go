@@ -11,6 +11,7 @@ import (
 
 func main() {
 	defer func() {
+		time.Sleep(100 * time.Millisecond)
 		var in string
 		fmt.Println("按 回车 键退出...")
 		fmt.Scanln(&in)
@@ -51,5 +52,4 @@ func main() {
 		date = reader.Text()
 	}
 	b.DownloadReceivedGiftList(date)
-	time.Sleep(10 * time.Millisecond)
 }
