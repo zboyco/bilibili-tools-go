@@ -1,6 +1,7 @@
 package bilibili_tools_go
 
 import (
+	"bytes"
 	"crypto/md5"
 	"crypto/rand"
 	"crypto/rsa"
@@ -16,13 +17,6 @@ import (
 	"strings"
 )
 
-func stringToCookie(cookie string) []*http.Cookie {
-	header := http.Header{}
-	header.Add("cookie", cookie)
-	req := &http.Request{Header: header}
-	return req.Cookies()
-}
-
 func network(url, method, query string) (req *http.Request, err error) {
 	switch method {
 	case "GET":
@@ -30,7 +24,7 @@ func network(url, method, query string) (req *http.Request, err error) {
 		req.URL.RawQuery = query
 	case "POST":
 		req, err = http.NewRequest("POST", url, strings.NewReader(query))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8;")
 	}
 	if err != nil {
 		return nil, err
@@ -56,7 +50,7 @@ func calcSign(param string) string {
 func rsaEncryptPwd(password string) (string, error) {
 	ret := &rsaLogin{}
 	payload := fmt.Sprintf("appkey=%s&sign=%s", AppKey, calcSign(fmt.Sprintf("appkey=%s", AppKey)))
-	resp, err := http.Post("https://passport.bilibili.com/api/oauth2/getKey", "application/x-www-form-urlencoded; charset=utf-8;", strings.NewReader(payload))
+	resp, err := http.Post(OAuth2GetKeyUrl, "application/x-www-form-urlencoded; charset=utf-8;", strings.NewReader(payload))
 	if err != nil {
 		return "", err
 	}
@@ -92,4 +86,33 @@ func pathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// 识别验证码
+func identifyCaptcha(src []byte) (string, error) {
+	body := make(map[string]string)
+	body["image"] = base64.StdEncoding.EncodeToString(src)
+	bytesData, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.Post("https://bili.dev:2233/captcha", "application/json", bytes.NewBuffer(bytesData))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	result := &struct {
+		Message string `json:"message"`
+		Code    int    `json:"code"`
+		Success bool   `json:"success"`
+	}{}
+	if err = jsonProc(resp, result); err != nil {
+		return "", err
+	}
+	if result.Code != 0 {
+		return "", errors.New(result.Message)
+	}
+	return result.Message, nil
 }

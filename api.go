@@ -85,7 +85,7 @@ func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 
 	wg.Wait()
 	// 保存文件
-	fileName := fmt.Sprintf("%v礼物流水-%v.xlsx", date, time.Now().Format("20060102150405"))
+	fileName := fmt.Sprintf("%v礼物流水-%v.xlsx", date, time.Now().Unix())
 	fmt.Println("")
 	if err := f.SaveAs(fileName); err != nil {
 		fmt.Println("保存失败，", err.Error())
@@ -104,7 +104,7 @@ func (bili *Bilibili) getReceivedGiftList(date, offset string) (*liveReceivedGif
 	data.Add("next_offset", offset)
 	data.Add("page_size", "20")
 
-	req, err := network(LiveReceivedGiftList, "GET", data.Encode())
+	req, err := network(LiveReceivedGiftListUrl, "GET", data.Encode())
 	req.Header.Set("Host", "api.live.bilibili.com")
 	req.Header.Set("Origin", "https://link.bilibili.com")
 	req.Header.Set("Referer", "https://link.bilibili.com/p/center/index")

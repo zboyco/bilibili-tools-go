@@ -11,10 +11,10 @@ type Bilibili struct {
 }
 
 type loginInfo struct {
-	UserName     string `json:"user_name"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	Cookies      string `json:"cookies"`
+	UserName     string            `json:"user_name"`
+	AccessToken  string            `json:"access_token"`
+	RefreshToken string            `json:"refresh_token"`
+	Cookies      map[string]string `json:"cookies"`
 }
 
 type userInfo struct {
@@ -47,18 +47,42 @@ type rsaLogin struct {
 	} `json:"data"`
 }
 
-type userAccess struct {
+type oAuth2Login struct {
 	Code int `json:"code"`
+	TS   int `json:"ts"`
 	Data struct {
 		Status    int `json:"status"`
 		TokenInfo struct {
 			AccessToken  string `json:"access_token"`
 			RefreshToken string `json:"refresh_token"`
+			ExpiresIn    int    `json:"expires_in"`
 		} `json:"token_info"`
 		CookieInfo struct {
 			Cookies []struct {
-				Name  string `json:"name"`
-				Value string `json:"value"`
+				Name    string `json:"name"`
+				Value   string `json:"value"`
+				Expires int    `json:"expires"`
+			} `json:"cookies"`
+		} `json:"cookie_info"`
+	} `json:"data"`
+	Message string `json:"message"`
+}
+
+type oAuth2Refresh struct {
+	Code int `json:"code"`
+	TS   int `json:"ts"`
+	Data struct {
+		TokenInfo struct {
+			MID          int    `json:"mid"`
+			AccessToken  string `json:"access_token"`
+			RefreshToken string `json:"refresh_token"`
+			ExpiresIn    int    `json:"expires_in"`
+		} `json:"token_info"`
+		CookieInfo struct {
+			Cookies []struct {
+				Name    string `json:"name"`
+				Value   string `json:"value"`
+				Expires int    `json:"expires"`
 			} `json:"cookies"`
 		} `json:"cookie_info"`
 	} `json:"data"`
