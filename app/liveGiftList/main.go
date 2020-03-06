@@ -7,9 +7,9 @@ import (
 
 func main() {
 	defer func() {
-		var in string
-		fmt.Println("按 回车 键退出...")
-		fmt.Scanln(&in)
+		var exit string
+		fmt.Println("\n按 回车 键退出...")
+		fmt.Scanln(&exit)
 	}()
 
 	bili, err := bilibili_tools_go.Login()
@@ -20,6 +20,6 @@ func main() {
 
 	var date string
 	fmt.Print("请输入需要导出的日期(如:20200305): ")
-	fmt.Scanf("%s", &date)
+	fmt.Scanln(&date)
 	bili.DownloadReceivedGiftList(date)
 }
