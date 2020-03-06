@@ -1,6 +1,7 @@
 package bilibili_tools_go
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
@@ -17,13 +18,42 @@ import (
 	"syscall"
 )
 
-// NewFromLogin 账号密码登录
-func NewFromLogin(userName, userPwd string) (*Bilibili, error) {
+func Login() (*Bilibili, error) {
+	var userName, userPwd string
+	// 读取用户账号密码
+	reader := bufio.NewScanner(os.Stdin)
+	fmt.Print("请输入账号: ")
+	if reader.Scan() {
+		userName = reader.Text()
+	}
+
+	fmt.Println("尝试缓存登录...")
+	bili, err := byCookie(userName)
+	if err == nil {
+		fmt.Println("登录成功...")
+		return bili, nil
+	}
+
+	fmt.Print("缓存登录失败，请输入密码: ")
+	if reader.Scan() {
+		userPwd = reader.Text()
+	}
+	bili, err = byPassword(userName, userPwd)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("登录成功...")
+	return bili, nil
+}
+
+// 账号密码登录
+func byPassword(userName, userPwd string) (*Bilibili, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
-	bili := &Bilibili{Client: &http.Client{Jar: jar}, info: &loginInfo{UserName: userName}}
+	bili := &Bilibili{client: &http.Client{Jar: jar}, info: &loginInfo{UserName: userName}}
 	if err = bili.login(userName, userPwd, ""); err != nil {
 		return nil, err
 	}
@@ -31,19 +61,44 @@ func NewFromLogin(userName, userPwd string) (*Bilibili, error) {
 	return bili, nil
 }
 
-// NewFromCookie Cookie登录
-func NewFromCookie(cookie string) (*Bilibili, error) {
+// Cookie登录
+func byCookie(userName string) (*Bilibili, error) {
+	exist, _ := pathExists(ConfigFileName)
+	if !exist {
+		return nil, errors.New("no config")
+	}
+	jsonByte, err := ioutil.ReadFile(ConfigFileName)
+	if err != nil {
+		return nil, err
+	}
+
+	users := map[string]*loginInfo{}
+	err = json.Unmarshal(jsonByte, &users)
+	if err != nil {
+		return nil, err
+	}
+	if _, exist := users[userName]; !exist {
+		return nil, errors.New("no config")
+	}
+
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
-	procCookie := stringToCookie(cookie)
+	procCookie := stringToCookie(users[userName].Cookies)
 	for i := range procCookie {
 		procCookie[i].Domain = ".bilibili.com"
 		procCookie[i].Path = "/"
 	}
 	jar.SetCookies(BiliLoginURL, procCookie)
-	ret := &Bilibili{Client: &http.Client{Jar: jar}}
+	ret := &Bilibili{client: &http.Client{Jar: jar}, info: users[userName]}
+	logged, err := ret.IsLoggedIn()
+	if err != nil {
+		return nil, err
+	}
+	if !logged {
+		return nil, errors.New("by cookie fail")
+	}
 	return ret, nil
 }
 
@@ -77,7 +132,7 @@ func (bili *Bilibili) login(userName, userPwd, captcha string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := bili.Client.Do(req)
+	resp, err := bili.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -115,7 +170,7 @@ func (bili *Bilibili) login(userName, userPwd, captcha string) error {
 		bili.info.Cookies = cookiesStr
 		bili.info.AccessToken = user.Data.TokenInfo.AccessToken
 		bili.info.RefreshToken = user.Data.TokenInfo.RefreshToken
-		bili.Client.Jar.SetCookies(BiliLoginURL, cookies)
+		bili.client.Jar.SetCookies(BiliLoginURL, cookies)
 		return nil
 	}
 	return fmt.Errorf("error with code: %d, %s", user.Code, user.Message)
@@ -127,7 +182,7 @@ func (bili *Bilibili) IsLoggedIn() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	resp, err := bili.Client.Do(req)
+	resp, err := bili.client.Do(req)
 	defer resp.Body.Close()
 	userInfo := new(userInfo)
 	if err = jsonProc(resp, userInfo); err != nil {
@@ -146,7 +201,7 @@ func (bili *Bilibili) getCaptcha() (string, error) {
 	req.Header.Set("Host", "passport.bilibili.com")
 	req.Header.Set("Referer", "https://passport.bilibili.com/login")
 	req.Header.Set("Accept", "image/jpeg")
-	resp, err := bili.Client.Do(req)
+	resp, err := bili.client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -216,7 +271,7 @@ func identifyCaptcha(src []byte) (string, error) {
 
 // 保存登录信息
 func saveLoginInfo(info *loginInfo) {
-	f, err := os.OpenFile("config.json", os.O_CREATE|os.O_RDWR, 0600)
+	f, err := os.OpenFile(ConfigFileName, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		fmt.Println(err)
 		return

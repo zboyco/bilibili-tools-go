@@ -14,7 +14,7 @@ import (
 // DownloadReceivedGiftList 下载金瓜子礼物流水
 func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 	// 访问直播中心礼物流水页面
-	_, err := bili.Client.Get("https://link.bilibili.com/p/center/index#/my-room/gift-list")
+	_, err := bili.client.Get("https://link.bilibili.com/p/center/index#/my-room/gift-list")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -111,7 +111,7 @@ func (bili *Bilibili) getReceivedGiftList(date, offset string) (*liveReceivedGif
 	if err != nil {
 		return nil, err
 	}
-	resp, err := bili.Client.Do(req)
+	resp, err := bili.client.Do(req)
 	if err != nil {
 		return nil, err
 	}

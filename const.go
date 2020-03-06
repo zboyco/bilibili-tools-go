@@ -5,6 +5,8 @@ import (
 )
 
 const (
+	ConfigFileName = "config.json"
+
 	UserAgent = "Mozilla/5.0 BiliDroid/5.51.1 (xxxxxx@gmail.com)"
 	MainHost  = "https://www.bilibili.com"
 	LoginHost = "https://passport.bilibili.com/login"

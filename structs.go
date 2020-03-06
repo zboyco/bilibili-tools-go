@@ -4,9 +4,9 @@ import (
 	"net/http"
 )
 
-// Bilibili is a struct for easy net.Client access
+// Bilibili is a struct for easy net.client access
 type Bilibili struct {
-	Client *http.Client
+	client *http.Client
 	info   *loginInfo
 }
 

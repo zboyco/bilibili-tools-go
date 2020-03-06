@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -80,4 +81,15 @@ func rsaEncrypt(publicKey []byte, origData []byte) ([]byte, error) {
 	}
 	pub := pubInterface.(*rsa.PublicKey)
 	return rsa.EncryptPKCS1v15(rand.Reader, pub, origData)
+}
+
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
