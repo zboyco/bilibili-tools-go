@@ -23,10 +23,11 @@ func NewFromLogin(userName, userPwd string) (*Bilibili, error) {
 	if err != nil {
 		return nil, err
 	}
-	bili := &Bilibili{Client: &http.Client{Jar: jar}}
+	bili := &Bilibili{Client: &http.Client{Jar: jar}, info: &loginInfo{UserName: userName}}
 	if err = bili.login(userName, userPwd, ""); err != nil {
 		return nil, err
 	}
+	saveLoginInfo(bili.info)
 	return bili, nil
 }
 
@@ -100,8 +101,10 @@ func (bili *Bilibili) login(userName, userPwd, captcha string) error {
 	}
 	if user.Code == 0 && user.Data.Status == 0 {
 		// 正常
+		var cookiesStr string
 		cookies := make([]*http.Cookie, len(user.Data.CookieInfo.Cookies))
 		for i, v := range user.Data.CookieInfo.Cookies {
+			cookiesStr += fmt.Sprintf("%s=%s; ", v.Name, v.Value)
 			cookies[i] = &http.Cookie{
 				Name:   v.Name,
 				Value:  v.Value,
@@ -109,6 +112,9 @@ func (bili *Bilibili) login(userName, userPwd, captcha string) error {
 				Path:   "/",
 			}
 		}
+		bili.info.Cookies = cookiesStr
+		bili.info.AccessToken = user.Data.TokenInfo.AccessToken
+		bili.info.RefreshToken = user.Data.TokenInfo.RefreshToken
 		bili.Client.Jar.SetCookies(BiliLoginURL, cookies)
 		return nil
 	}
@@ -206,4 +212,44 @@ func identifyCaptcha(src []byte) (string, error) {
 		return "", errors.New(result.Message)
 	}
 	return result.Message, nil
+}
+
+// 保存登录信息
+func saveLoginInfo(info *loginInfo) {
+	f, err := os.OpenFile("config.json", os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	jsonByte, err := ioutil.ReadAll(f)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	users := map[string]*loginInfo{}
+
+	if len(jsonByte) > 0 {
+		if err := json.Unmarshal(jsonByte, &users); err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, exist := users[info.UserName]
+		if exist {
+			delete(users, info.UserName)
+		}
+	}
+	users[info.UserName] = info
+
+	jsonByte, err = json.MarshalIndent(users, "", "	")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	f.Truncate(0)
+	f.Seek(0, 0)
+	_, err = f.Write(jsonByte)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

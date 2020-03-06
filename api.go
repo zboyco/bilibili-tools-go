@@ -23,12 +23,12 @@ func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 
 	// 创建文件
 	f := excelize.NewFile()
-	f.SetCellValue("Sheet1", "A1", "用户昵称")
-	f.SetCellValue("Sheet1", "B1", "用户ID")
-	f.SetCellValue("Sheet1", "C1", "礼物名称")
-	f.SetCellValue("Sheet1", "D1", "数量")
-	f.SetCellValue("Sheet1", "E1", "金仓鼠")
-	f.SetCellValue("Sheet1", "F1", "时间")
+	_ = f.SetCellValue("Sheet1", "A1", "用户昵称")
+	_ = f.SetCellValue("Sheet1", "B1", "用户ID")
+	_ = f.SetCellValue("Sheet1", "C1", "礼物名称")
+	_ = f.SetCellValue("Sheet1", "D1", "数量")
+	_ = f.SetCellValue("Sheet1", "E1", "金仓鼠")
+	_ = f.SetCellValue("Sheet1", "F1", "时间")
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -45,12 +45,12 @@ func (bili *Bilibili) DownloadReceivedGiftList(date string) {
 			}
 			for _, item := range m.Data.List {
 				line++
-				f.SetCellValue("Sheet1", fmt.Sprintf("A%v", line), item.UName)
-				f.SetCellValue("Sheet1", fmt.Sprintf("B%v", line), strconv.Itoa(item.UID))
-				f.SetCellValue("Sheet1", fmt.Sprintf("C%v", line), item.GiftName)
-				f.SetCellValue("Sheet1", fmt.Sprintf("D%v", line), item.GiftNum)
-				f.SetCellValue("Sheet1", fmt.Sprintf("E%v", line), item.Hamster)
-				f.SetCellValue("Sheet1", fmt.Sprintf("F%v", line), item.Time)
+				_ = f.SetCellValue("Sheet1", fmt.Sprintf("A%v", line), item.UName)
+				_ = f.SetCellValue("Sheet1", fmt.Sprintf("B%v", line), strconv.Itoa(item.UID))
+				_ = f.SetCellValue("Sheet1", fmt.Sprintf("C%v", line), item.GiftName)
+				_ = f.SetCellValue("Sheet1", fmt.Sprintf("D%v", line), item.GiftNum)
+				_ = f.SetCellValue("Sheet1", fmt.Sprintf("E%v", line), item.Hamster)
+				_ = f.SetCellValue("Sheet1", fmt.Sprintf("F%v", line), item.Time)
 				fmt.Println(item.UName, ":", item.GiftName, "*", item.GiftNum)
 			}
 		}

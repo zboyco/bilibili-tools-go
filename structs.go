@@ -6,10 +6,15 @@ import (
 
 // Bilibili is a struct for easy net.Client access
 type Bilibili struct {
-	Client       *http.Client
-	accessToken  string
-	refreshToken string
-	cookie       string
+	Client *http.Client
+	info   *loginInfo
+}
+
+type loginInfo struct {
+	UserName     string `json:"user_name"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	Cookies      string `json:"cookies"`
 }
 
 type userInfo struct {
@@ -61,20 +66,20 @@ type userAccess struct {
 }
 
 type liveReceivedGiftList struct {
-	Code int `json:"code"`
-	Msg string `json:"msg"`
+	Code    int    `json:"code"`
+	Msg     string `json:"msg"`
 	Message string `json:"message"`
-	Data struct{
-		List []struct{
-			UID int `json:"uid"`
-			UName string `json:"uname"`
-			Time string `json:"time"`
-			GiftID int `json:"gift_id"`
+	Data    struct {
+		List []struct {
+			UID      int    `json:"uid"`
+			UName    string `json:"uname"`
+			Time     string `json:"time"`
+			GiftID   int    `json:"gift_id"`
 			GiftName string `json:"gift_name"`
-			GiftNum int `json:"gift_num"`
-			Hamster int `json:"hamster"`
+			GiftNum  int    `json:"gift_num"`
+			Hamster  int    `json:"hamster"`
 		} `json:"list"`
-		HasMore int `json:"has_more"`
+		HasMore    int    `json:"has_more"`
 		NextOffset string `json:"next_offset"`
 	} `json:"data"`
 }
