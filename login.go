@@ -49,6 +49,7 @@ func Login() (*Bilibili, error) {
 		// token
 		err = bili.byToken()
 		if err == nil {
+			bili.saveLoginInfo()
 			fmt.Println("登录成功...")
 			return bili, nil
 		}
