@@ -1,6 +1,7 @@
 package bilibili_tools_go
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/url"
@@ -10,6 +11,30 @@ import (
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 )
+
+// 直播心跳
+func (bili *Bilibili) liveHeartBeat() error {
+	req, err := network(LiveHeartBeatUrl, "GET", "")
+	req.Header.Set("Host", "api.live.bilibili.com")
+	req.Header.Set("Origin", "https://link.bilibili.com")
+	req.Header.Set("Referer", "https://link.bilibili.com/1")
+	if err != nil {
+		return err
+	}
+	resp, err := bili.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	result := &liveHeartBeat{}
+	if err = jsonProc(resp, result); err != nil {
+		return err
+	}
+	if result.Code != 0 {
+		return errors.New(result.Message)
+	}
+	return nil
+}
 
 // DownloadReceivedGiftList 下载金瓜子礼物流水
 func (bili *Bilibili) DownloadReceivedGiftList(date string) {
@@ -121,4 +146,56 @@ func (bili *Bilibili) getReceivedGiftList(date, offset string) (*liveReceivedGif
 		return nil, err
 	}
 	return user, nil
+}
+
+// LiveDoSign 直播签到
+func (bili *Bilibili) LiveDoSign() (string, error) {
+	req, err := network(LiveDoSignUrl, "GET", "")
+	req.Header.Set("Host", "api.live.bilibili.com")
+	req.Header.Set("Origin", "https://link.bilibili.com")
+	req.Header.Set("Referer", "https://link.bilibili.com/1")
+	if err != nil {
+		return "", err
+	}
+	resp, err := bili.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	result := &liveDoSign{}
+	if err = jsonProc(resp, result); err != nil {
+		return "", err
+	}
+	if result.Code != 0 {
+		return "", errors.New(result.Message)
+	}
+	return result.Message, nil
+}
+
+// Silver2Coin 银瓜子换硬币
+func (bili *Bilibili) Silver2Coin() error {
+	data := url.Values{}
+	data.Add("csrf_token", bili.info.Cookies["bili_jct"])
+	data.Add("visit_id", "")
+
+	req, err := network(LiveSilver2coinUrl, "POST", data.Encode())
+	req.Header.Set("Host", "api.live.bilibili.com")
+	req.Header.Set("Origin", "https://link.bilibili.com")
+	req.Header.Set("Referer", "https://link.bilibili.com/1")
+	if err != nil {
+		return err
+	}
+	resp, err := bili.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	result := &silver2Coin{}
+	if err = jsonProc(resp, result); err != nil {
+		return err
+	}
+	if result.Code != 0 {
+		return errors.New(result.Message)
+	}
+	return nil
 }

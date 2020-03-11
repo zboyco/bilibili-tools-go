@@ -19,7 +19,10 @@ const (
 	SecretKey = "560c52ccd288fed045859ed18bffd973"
 
 	UserInfoUrl             = "https://account.bilibili.com/home/userInfo"
+	LiveHeartBeatUrl        = "https://api.live.bilibili.com/relation/v1/Feed/heartBeat"
 	LiveReceivedGiftListUrl = "https://api.live.bilibili.com/gift/v1/master/getReceivedGiftList"
+	LiveDoSignUrl           = "https://api.live.bilibili.com/sign/doSign"
+	LiveSilver2coinUrl      = "https://api.live.bilibili.com/pay/v1/Exchange/silver2coin"
 )
 
 var BiliLoginURL *url.URL

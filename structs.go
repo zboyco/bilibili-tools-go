@@ -89,6 +89,19 @@ type oAuth2Refresh struct {
 	Message string `json:"message"`
 }
 
+// 直播心跳
+type liveHeartBeat struct {
+	Code    int    `json:"code"`
+	Msg     string `json:"msg"`
+	Message string `json:"message"`
+	Data    struct {
+		Open   int `json:"open"`
+		HasNew int `json:"has_new"`
+		Count  int `json:"count"`
+	} `json:"data"`
+}
+
+// 直播礼物流水
 type liveReceivedGiftList struct {
 	Code    int    `json:"code"`
 	Msg     string `json:"msg"`
@@ -105,5 +118,32 @@ type liveReceivedGiftList struct {
 		} `json:"list"`
 		HasMore    int    `json:"has_more"`
 		NextOffset string `json:"next_offset"`
+	} `json:"data"`
+}
+
+// 直播签到
+type liveDoSign struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	TTL     int    `json:"ttl"`
+	Data    struct {
+		Text        string `json:"text"`
+		SpecialText string `json:"specialText"`
+		AllDays     int    `json:"allDays"`
+		HadSignDays int    `json:"hadSignDays"`
+		IsBonusDay  int    `json:"isBonusDay"`
+	} `json:"data"`
+}
+
+// 直播银瓜子换硬币
+type silver2Coin struct {
+	Code    int    `json:"code"`
+	Msg     string `json:"msg"`
+	Message string `json:"message"`
+	Data    struct {
+		Gold   string `json:"gold"`
+		Silver string `json:"silver"`
+		TID    string `json:"tid"`
+		Coin   int    `json:"coin"`
 	} `json:"data"`
 }

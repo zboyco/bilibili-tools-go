@@ -1,4 +1,4 @@
 .idea
 *.exe
 *.xlsx
-config.json
+app/liveGiftList/config.json
